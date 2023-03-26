@@ -1,0 +1,35 @@
+# kubectl create -f replicaset-definiton.yml
+# kubectl get replicaset
+# kubectl delete replicaset myapp-replicaset 
+    # -> also deletes all underlying POD(s)
+
+# kubectl replace -f replicaset-definiton.yml
+# kubectl scale -replicas=6 replicaset-definition.yml
+    # this will not modify the file itself.
+
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata: 
+  name: myapp-replicaset
+  labels:
+    app: myapp
+    type: front-end
+
+spec:
+  template:
+    metadata:
+      name: myapp-pod # name of the pod
+      labels:
+        app: myapp # name of the App
+        type: front-end
+
+    spec:
+      containers:  
+        - name: nginx-container
+          image: nginx
+
+  replicas: 3
+  selector:
+    matchLabels:
+      type: front-end
