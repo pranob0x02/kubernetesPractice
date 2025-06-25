@@ -7,11 +7,12 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx
+      app: nginx #Pod with label app=nginx is “owned” by this Deployment’s ReplicaSet.
+
   template:
     metadata:
       labels:
-        app: nginx
+        app: nginx #Pod created from this template will have the label app=nginx
     spec:
       containers:
         - name: nginx

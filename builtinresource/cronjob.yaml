@@ -2,7 +2,6 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: nginx-cronjob
-  namespace: pranob-test
 spec:
   schedule: "*/5 * * * *"  # This will run the job every 5 minutes
   jobTemplate:
@@ -10,15 +9,13 @@ spec:
       template:
         metadata:
           name: pranob-001
-          namespace: pranob-test
         spec:
           containers:
             - name: nginx
               image: nginx:perl
-              env:
-                - name: CITY
-                  value: "Riga"
-              ports:
-                - containerPort: 80
+              command: ['date']
           restartPolicy: OnFailure
+
+
+###################
 

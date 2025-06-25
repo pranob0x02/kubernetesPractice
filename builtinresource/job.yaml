@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: echo-date-minimal
+spec:
+  completions: 2 # “Run this Pod template N times, separately.”
+  # parallelism: 2
+
+  template:
+    spec:
+      containers:
+      - name: echo-date
+        image: busybox
+        command: ['date']
+      restartPolicy: Never
+  backoffLimit: 1

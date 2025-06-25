@@ -1,0 +1,47 @@
+# POD either specifies
+# 1. volumeClaimTemplate for statefulset
+# 2. PersistentVolumeClaim for deployment
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc
+spec:
+  storageClassName: standard # dynamic provisioning
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app:  nginx
+    spec:
+      containers:
+      - name:  nginx
+        image:  nginx:latest
+        resources: {}
+        ports:
+        - containerPort:  80
+          name:  nginx
+        volumeMounts:
+        - name: nginx-pv
+          mountPath: /usr/share/nginx/html # mounts volume to container filesystem
+      
+      # Declares a volume that the pod will use.
+      volumes:
+        - name: nginx-pv
+          persistentVolumeClaim:
+            claimName: nginx-pvc # binds the volume to the existing PVC

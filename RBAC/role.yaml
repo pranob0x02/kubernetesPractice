@@ -1,0 +1,60 @@
+# kubectl api-resources
+# check details just to be sure
+
+# Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-reader-sa
+
+---
+
+# RoleBinding
+# This RoleBinding grants the ServiceAccount access to the Role defined above
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-pods-binding
+subjects:
+  - kind: ServiceAccount
+    name: pod-reader-sa
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+
+---
+
+# This Job uses the ServiceAccount to run a command that lists pods in the namespace
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: roletest-job
+  namespace: default
+  labels:
+    app: roletest
+spec:
+  template:
+    metadata:
+      name: roletest
+      labels:
+        app: roletest
+    spec:
+      serviceAccountName: pod-reader-sa
+      containers:
+      - name: roletest
+        image: cgr.dev/chainguard/kubectl
+        command: ['kubectl', 'get', 'pods' , '-A']
+      restartPolicy: OnFailure
+  backoffLimit: 4

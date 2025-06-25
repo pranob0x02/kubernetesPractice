@@ -1,0 +1,54 @@
+# ClusterRole for reading pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-reader-clusterrole-sa
+
+---
+# ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pod-reader-binding
+subjects:
+  - kind: ServiceAccount
+    name: pod-reader-clusterrole-sa
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+
+
+---
+# This Job uses the ServiceAccount to run a command that lists pods in the namespace
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pod-reader-clusterrole-job
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: roletest
+      labels:
+        app: roletest
+    spec:
+      serviceAccountName: pod-reader-clusterrole-sa
+      containers:
+      - name: roletest
+        image: cgr.dev/chainguard/kubectl
+        command: ['kubectl', 'get', 'pods' , '-A']
+      restartPolicy: OnFailure
+  backoffLimit: 4

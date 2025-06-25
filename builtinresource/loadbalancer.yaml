@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-loadbalancer
+  # namespace: pranob-test-namespace
+spec:
+  selector:
+    app: nginx # This service will route traffic to pods with label app=nginx
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  type: LoadBalancer
+
+#######################
+# You can even write a Service that targets Pods created without a Deployment
+# as long as the labels match.
